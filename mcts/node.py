@@ -60,10 +60,7 @@ class MonteCarloTreeSearchNode:
     def is_fully_expanded(self):
         return len(self.untried_actions) == 0
 
-    def best_child(self, c_param=14.44):
-        if c_param == 0:
-            for c in self.children:
-                print(c.n, end=' ')
+    def best_child(self, c_param=1.44):
         choices_weights = [
             (c.q / c.n) + c_param * np.sqrt(2 * np.log(self.n) / c.n)
             for c in self.children
