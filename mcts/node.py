@@ -12,7 +12,7 @@ class MonteCarloTreeSearchNode:
         self._results = defaultdict(int)
         self.state = state
         self.parent = parent
-        self.children = []
+        self.children = [[], [], [], [], [], [], []]
 
     @property
     def untried_actions(self):
@@ -31,11 +31,15 @@ class MonteCarloTreeSearchNode:
         return self._number_of_visits
 
     def expand(self):
+        _children = []
         action = self.untried_actions.pop()
-        next_state = self.state.move(action)
-        child_node = MonteCarloTreeSearchNode(next_state, self)
-        self.children.append(child_node)
-        return child_node
+        state = self.state.move(action)
+        for key in range(1, 7):
+            next_state = State(state.board, state.next_to_move, key)
+            child = MonteCarloTreeSearchNode(next_state, self)
+            _children.append(child)
+            self.children[key].append(child)
+        return _children
 
     def is_terminal_node(self):
         return self.state.is_game_over()
@@ -60,12 +64,17 @@ class MonteCarloTreeSearchNode:
     def is_fully_expanded(self):
         return len(self.untried_actions) == 0
 
-    def best_child(self, c_param=1.44):
+    def best_child(self, c_param=1.44, key=None):
+        if key is None:
+            key = np.random.randint(1, 7)
         choices_weights = [
             (c.q / c.n) + c_param * np.sqrt(2 * np.log(self.n) / c.n)
-            for c in self.children
+            for c in self.children[key]
         ]
         if c_param == 0:
-            cc = self.children[np.argmax(choices_weights)]
+            cc = self.children[key][np.argmax(choices_weights)]
             print(cc._results[-1] / cc.n * 100, '%')
-        return self.children[np.argmax(choices_weights)]
+            # for childs in self.children[1:]:
+            #     for child in childs:
+            #         print(child.state.key)
+        return self.children[key][np.argmax(choices_weights)]

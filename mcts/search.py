@@ -14,11 +14,17 @@ class MonteCarloTreeSearch:
         a = 0
         while time.time() - start_time < 10:
             v = self.tree_policy()
-            reward = v.rollout()
-            v.backpropagate(reward)
-            a += 1
+            if type(v) is list:
+                for i in v:
+                    reward = i.rollout()
+                    i.backpropagate(reward)
+                    a += 1
+            else:
+                reward = v.rollout()
+                v.backpropagate(reward)
+                a += 1
         print(a)
-        return self.root.best_child(0)
+        return self.root.best_child(0, self.root.state.key)
 
     def tree_policy(self):
         current_node = self.root

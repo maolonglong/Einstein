@@ -20,18 +20,16 @@ class State:
     red = 1
     blue = -1
 
-    def __init__(self, board, key, next_to_move=1):
+    def __init__(self, board, next_to_move, key):
         self.board = board
         self.next_to_move = next_to_move
-        self.num_of_red = np.sum(self.board > 0)
-        self.num_of_blue = np.sum(self.board < 0)
         self.key = key
 
     @property
     def game_result(self):
-        if self.board[4][4] > 0 or self.num_of_blue == 0:
+        if self.board[4][4] > 0 or np.sum(self.board < 0) == 0:
             return 1
-        elif self.board[0][0] < 0 or self.num_of_red == 0:
+        elif self.board[0][0] < 0 or np.sum(self.board > 0) == 0:
             return -1
         else:
             return None
@@ -45,7 +43,7 @@ class State:
         new_board[move.from_x][move.from_y] = 0
         next_to_move = State.red if self.next_to_move == State.blue \
             else State.blue
-        return State(new_board, next_to_move)
+        return State(new_board, next_to_move, self.key)
 
     def _get_legal_actions(self, key):
         f = np.where(self.board == key * self.next_to_move)
