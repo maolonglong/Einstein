@@ -73,7 +73,7 @@ class MonteCarloTreeSearchNode:
         ]
         if c_param == 0:
             cc = self.children[key][np.argmax(choices_weights)]
-            print(cc._results[-1] / cc.n * 100, '%')
+            print(cc._results[self.state.next_to_move] / cc.n * 100, '%')
             # for childs in self.children[1:]:
             #     for child in childs:
             #         print(child.state.key)
