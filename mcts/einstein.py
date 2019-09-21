@@ -73,20 +73,21 @@ class State:
                         Move(f[0][0], f[1][0], f[0][0] - 1, f[1][0] - 1))
             return actions
 
-    def get_legal_actions(self):
-        tmp = self._get_legal_actions(self.key)
+    def get_legal_actions(self, key=None):
+        key = self.key if key is None else key
+        tmp = self._get_legal_actions(key)
         if tmp is not None:
             return tmp
         else:
             actions = []
-            k = self.key - 1
+            k = key - 1
             while k > 0:
                 tmp = self._get_legal_actions(k)
                 if tmp is not None:
                     actions += tmp
                     break
                 k -= 1
-            k = self.key + 1
+            k = key + 1
             while k < 7:
                 tmp = self._get_legal_actions(k)
                 if tmp is not None:
@@ -94,7 +95,6 @@ class State:
                     break
                 k += 1
             return actions
-
 
 # TEST CODE
 # if __name__ == '__main__':

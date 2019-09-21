@@ -49,10 +49,12 @@ class MonteCarloTreeSearchNode:
 
     def rollout(self):
         current_rollout_state = self.state
+        key = current_rollout_state.key
         while not current_rollout_state.is_game_over():
-            possible_moves = current_rollout_state.get_legal_actions()
+            possible_moves = current_rollout_state.get_legal_actions(key)
             action = self.rollout_policy(possible_moves)
             current_rollout_state = current_rollout_state.move(action)
+            key = np.random.randint(1, 7)
         return current_rollout_state.game_result
 
     def backpropagate(self, result):
@@ -64,9 +66,8 @@ class MonteCarloTreeSearchNode:
     def is_fully_expanded(self):
         return len(self.untried_actions) == 0
 
-    def best_child(self, c_param=1.44, key=None):
-        if key is None:
-            key = np.random.randint(1, 7)
+    def best_child(self, c_param=1.44):
+        key = np.random.randint(1, 7)
         choices_weights = [
             (c.q / c.n) + c_param * np.sqrt(2 * np.log(self.n) / c.n)
             for c in self.children[key]
@@ -78,3 +79,16 @@ class MonteCarloTreeSearchNode:
             #     for child in childs:
             #         print(child.state.key)
         return self.children[key][np.argmax(choices_weights)]
+
+# if __name__ == '__main__':
+#     a = np.array([
+#         [1, 2, 3, 0, 0],
+#         [4, 5, 0, 0, 0],
+#         [6, 0, 0, 0, -1],
+#         [0, 0, 0, -2, -3],
+#         [0, 0, -4, -5, -6]
+#     ])
+#     s = State(a, 1, 5)
+#     node = MonteCarloTreeSearchNode(s)
+#     for i in node.expand():
+#         print(i.state.board)

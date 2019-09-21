@@ -24,7 +24,7 @@ class MonteCarloTreeSearch:
                 v.backpropagate(reward)
                 a += 1
         print(a)
-        return self.root.best_child(0, self.root.state.key)
+        return self.root.best_child(0)
 
     def tree_policy(self):
         current_node = self.root
