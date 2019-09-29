@@ -30,9 +30,9 @@ class Game(tk.Tk):  # TODO 增加先手
         Game.first = True if select == 'y' else False
         if Game.first:
             Game.board = np.array([
-                [6, 5, 1, 0, 0],
-                [4, 3, 0, 0, 0],
-                [2, 0, 0, 0, 0],
+                [6, 2, 4, 0, 0],
+                [1, 5, 0, 0, 0],
+                [3, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0]
             ])
@@ -50,7 +50,7 @@ class Game(tk.Tk):  # TODO 增加先手
             state = State(Game.board, 1 if Game.first else -1, key)
             node = MonteCarloTreeSearchNode(state)
             tree = MonteCarloTreeSearch(node)
-            Game.board = tree.best_action().state.board
+            Game.board = tree.best_action()
             self.show_board()
             print(Game.board)
 
@@ -141,12 +141,13 @@ class Game(tk.Tk):  # TODO 增加先手
             Game._focus = None
             self.print_chess(tp[0], tp[1], 'empty', 0)
             self.print_chess(i, j, tp[2], tp[3])
+            self.print_board();
             key1 = input('对方色子: ')
             key2 = int(input('我方色子: '))
             state = State(Game.board, 1 if Game.first else -1, key2)
             node = MonteCarloTreeSearchNode(state)
             mcts = MonteCarloTreeSearch(node)
-            Game.board = mcts.best_action().state.board
+            Game.board = mcts.best_action()
             self.show_board()
             self.print_board()
 

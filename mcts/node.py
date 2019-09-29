@@ -67,17 +67,37 @@ class MonteCarloTreeSearchNode:
         return len(self.untried_actions) == 0
 
     def best_child(self, c_param=1.44):
+        if c_param == 0:
+            # cc = self.children[key][np.argmax(choices_weights)]
+            # print(cc._results[self.state.next_to_move] / cc.n * 100, '%')
+            print(self._results[self.state.next_to_move] / self.n * 100, '%')
+            dk = []
+            max_cnt = 0
+            ret = None
+            for i in range(1, 7):
+                choices_weights = [
+                    (c.q / c.n) + c_param * np.sqrt(2 * np.log(self.n) / c.n)
+                    for c in self.children[i]
+                ]
+                best_chi = self.children[i][np.argmax(choices_weights)].state.board
+                tmp_cnt = 1
+                for i in dk:
+                    if (best_chi == i).all():
+                        tmp_cnt += 1
+                dk.append(best_chi)
+                if tmp_cnt > max_cnt:
+                    max_cnt = tmp_cnt
+                    ret = dk[-1]
+            print(dk)
+            print('cnt:', max_cnt)
+            return ret
+
         key = np.random.randint(1, 7)
         choices_weights = [
             (c.q / c.n) + c_param * np.sqrt(2 * np.log(self.n) / c.n)
             for c in self.children[key]
         ]
-        if c_param == 0:
-            cc = self.children[key][np.argmax(choices_weights)]
-            print(cc._results[self.state.next_to_move] / cc.n * 100, '%')
-            # for childs in self.children[1:]:
-            #     for child in childs:
-            #         print(child.state.key)
+
         return self.children[key][np.argmax(choices_weights)]
 
 # if __name__ == '__main__':
