@@ -8,6 +8,7 @@ import tkinter as tk
 
 import numpy as np
 
+from multiprocessing import Pool
 from mcts.einstein import State
 from mcts.node import MonteCarloTreeSearchNode
 from mcts.search import MonteCarloTreeSearch
@@ -47,10 +48,34 @@ class Game(tk.Tk):  # TODO 增加先手
             Game.board[4][4] = -int(chess[5])
             print(Game.board)
             key = int(input('我方色子: '))
-            state = State(Game.board, 1 if Game.first else -1, key)
-            node = MonteCarloTreeSearchNode(state)
-            tree = MonteCarloTreeSearch(node)
-            Game.board = tree.best_action()
+            state1 = State(Game.board.copy(), 1 if Game.first else -1, key)
+            state2 = State(Game.board.copy(), 1 if Game.first else -1, key)
+            state3 = State(Game.board.copy(), 1 if Game.first else -1, key)
+            state4 = State(Game.board.copy(), 1 if Game.first else -1, key)
+            node1 = MonteCarloTreeSearchNode(state1)
+            node2 = MonteCarloTreeSearchNode(state2)
+            node3 = MonteCarloTreeSearchNode(state3)
+            node4 = MonteCarloTreeSearchNode(state4)
+            mcts1 = MonteCarloTreeSearch(node1)
+            mcts2 = MonteCarloTreeSearch(node2)
+            mcts3 = MonteCarloTreeSearch(node3)
+            mcts4 = MonteCarloTreeSearch(node4)
+
+            pool = Pool(4)
+            ress = pool.map(MonteCarloTreeSearch.best_action, [mcts1, mcts2, mcts3, mcts4])
+            pool.close()
+            pool.join()
+
+            max_cnt, best_res = 0, None
+            for res in ress:
+                cnt = 0
+                for i in ress:
+                    if (res == i).all():
+                        cnt += 1
+                if cnt > max_cnt:
+                    max_cnt = cnt
+                    best_res = res
+            Game.board = best_res
             self.show_board()
             print(Game.board)
 
@@ -144,10 +169,34 @@ class Game(tk.Tk):  # TODO 增加先手
             self.print_board();
             key1 = input('对方色子: ')
             key2 = int(input('我方色子: '))
-            state = State(Game.board, 1 if Game.first else -1, key2)
-            node = MonteCarloTreeSearchNode(state)
-            mcts = MonteCarloTreeSearch(node)
-            Game.board = mcts.best_action()
+            state1 = State(Game.board.copy(), 1 if Game.first else -1, key2)
+            state2 = State(Game.board.copy(), 1 if Game.first else -1, key2)
+            state3 = State(Game.board.copy(), 1 if Game.first else -1, key2)
+            state4 = State(Game.board.copy(), 1 if Game.first else -1, key2)
+            node1 = MonteCarloTreeSearchNode(state1)
+            node2 = MonteCarloTreeSearchNode(state2)
+            node3 = MonteCarloTreeSearchNode(state3)
+            node4 = MonteCarloTreeSearchNode(state4)
+            mcts1 = MonteCarloTreeSearch(node1)
+            mcts2 = MonteCarloTreeSearch(node2)
+            mcts3 = MonteCarloTreeSearch(node3)
+            mcts4 = MonteCarloTreeSearch(node4)
+
+            pool = Pool(4)
+            ress = pool.map(MonteCarloTreeSearch.best_action, [mcts1, mcts2, mcts3, mcts4])
+            pool.close()
+            pool.join()
+
+            max_cnt, best_res = 0, None
+            for res in ress:
+                cnt = 0
+                for i in ress:
+                    if (res == i).all():
+                        cnt += 1
+                if cnt > max_cnt:
+                    max_cnt = cnt
+                    best_res = res
+            Game.board = best_res
             self.show_board()
             self.print_board()
 

@@ -88,8 +88,8 @@ class MonteCarloTreeSearchNode:
                 if tmp_cnt > max_cnt:
                     max_cnt = tmp_cnt
                     ret = dk[-1]
-            print(dk)
-            print('cnt:', max_cnt)
+            # print(dk)
+            # print('cnt:', max_cnt)
             return ret
 
         key = np.random.randint(1, 7)

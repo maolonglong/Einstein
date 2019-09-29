@@ -13,6 +13,7 @@ class MonteCarloTreeSearch:
         start_time = time.time()
         a = 0
         while time.time() - start_time < 10:
+        # for i in range(10000):
             v = self.tree_policy()
             if type(v) is list:
                 for i in v:
