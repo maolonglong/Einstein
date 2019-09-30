@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # author: MaoLongLong
 # date: 2019/9/12
-# -*- coding: utf-8 -*-
-# author: MaoLongLong
-# date: 2019/8/13
 import tkinter as tk
 
 import numpy as np
+import time
 
 from multiprocessing import Pool
 from mcts.einstein import State
@@ -19,12 +17,20 @@ class Game(tk.Tk):  # TODO 增加先手
     board = None
     empty = 0
     _focus = None
+    i_dir = [5, 4, 3, 2, 1]
+    j_dir = ['A', 'B', 'C', 'D', 'E']
+    index = 1
+    txt_strs = []
 
     def __init__(self):
         super(Game, self).__init__()
         self.cv = tk.Canvas(self)
         self.setup_board()
         self.setup_ui()
+
+    @classmethod
+    def chess_dir(cls, i, j):
+        return '{}{}'.format(cls.j_dir[j], cls.i_dir[i])
 
     def setup_board(self):
         select = input('是否先手? ')
@@ -47,6 +53,13 @@ class Game(tk.Tk):  # TODO 增加先手
             Game.board[4][3] = -int(chess[4])
             Game.board[4][4] = -int(chess[5])
             print(Game.board)
+            Game.txt_strs.append(
+                'R:A5-{};B5-{};C5-{};A4-{};B4-{};A3-{}'.format(
+                    Game.board[0][0], Game.board[0][1], Game.board[0][2],
+                    Game.board[1][0], Game.board[1][1], Game.board[2][0]))
+            Game.txt_strs.append('B:E3{};D2{};E2{};C1{};D1{};E1{}'.format(
+                Game.board[2][4], Game.board[3][3], Game.board[3][4],
+                Game.board[4][2], Game.board[4][3], Game.board[4][4]))
             key = int(input('我方色子: '))
             state1 = State(Game.board.copy(), 1 if Game.first else -1, key)
             state2 = State(Game.board.copy(), 1 if Game.first else -1, key)
@@ -62,7 +75,8 @@ class Game(tk.Tk):  # TODO 增加先手
             mcts4 = MonteCarloTreeSearch(node4)
 
             pool = Pool(4)
-            ress = pool.map(MonteCarloTreeSearch.best_action, [mcts1, mcts2, mcts3, mcts4])
+            ress = pool.map(MonteCarloTreeSearch.best_action,
+                            [mcts1, mcts2, mcts3, mcts4])
             pool.close()
             pool.join()
 
@@ -75,6 +89,13 @@ class Game(tk.Tk):  # TODO 增加先手
                 if cnt > max_cnt:
                     max_cnt = cnt
                     best_res = res
+            tmp = np.where((Game.board == best_res) == False)
+            C = 'R{}'.format(best_res[tmp[0][1]][tmp[1][1]])
+            Game.txt_strs.append(
+                '{}:{};({},{})'.format(Game.index, key, C,
+                                       self.chess_dir(tmp[0][1],
+                                                      tmp[1][1])))
+            Game.index += 1
             Game.board = best_res
             self.show_board()
             print(Game.board)
@@ -97,6 +118,14 @@ class Game(tk.Tk):  # TODO 增加先手
             Game.board[1][1] = int(chess[4])
             Game.board[2][0] = int(chess[5])
             print(Game.board)
+            Game.txt_strs.append(
+                'R:A5-{};B5-{};C5-{};A4-{};B4-{};A3-{}'.format(
+                    Game.board[0][0], Game.board[0][1], Game.board[0][2],
+                    Game.board[1][0], Game.board[1][1], Game.board[2][0]))
+            Game.txt_strs.append(
+                'B:E3{};D2{};E2{};C1{};D1{};E1{}'.format(
+                    Game.board[2][4], Game.board[3][3], Game.board[3][4],
+                    Game.board[4][2], Game.board[4][3], Game.board[4][4]))
 
     def setup_ui(self):
         self.title('Einstein')
@@ -158,6 +187,33 @@ class Game(tk.Tk):  # TODO 增加先手
     def print_board():
         print(Game.board)
 
+    @classmethod
+    def game_over(cls):
+        if cls.board[4][4] > 0 or np.sum(cls.board < 0) == 0:
+            return 1
+        elif cls.board[0][0] < 0 or np.sum(cls.board > 0) == 0:
+            return -1
+        else:
+            return None
+
+    def get_txt_file(self):
+        a = input('先手队名: ')
+        b = input('后手队名: ')
+        c = input('先手胜利?[y/n]: ')
+        c = '先手胜' if c == 'y' else '后手胜'
+        # time.strftime("%Y.%m.%d %H:%M", time.localtime())
+        with open('./WTN-{}vs{}-{}{}.txt'.format(a, b, c,
+                                                 time.strftime("%Y%m%d%H%M",
+                                                               time.localtime())),
+                  'w') as fp:
+            fp.write(
+                '#[WTN][{} R][{} B][{}][{} 北京][2019CCGC];'.format(a, b, c,
+                                                                  time.strftime(
+                                                                      "%Y.%m.%d %H:%M",
+                                                                      time.localtime())) + '\n')
+            for i in Game.txt_strs:
+                fp.write(i + '\n')
+
     def on_right_click(self, event):
         i = (event.y - 20) // 88
         j = (event.x - 20) // 88
@@ -168,6 +224,18 @@ class Game(tk.Tk):  # TODO 增加先手
             self.print_chess(i, j, tp[2], tp[3])
             self.print_board();
             key1 = input('对方色子: ')
+            C = 'B{}'.format(abs(tp[3])) if Game.first else 'R{}'.format(
+                abs(tp[3]))
+            Game.txt_strs.append('{}:{};({},{})'.format(Game.index, key1, C,
+                                                        self.chess_dir(i, j)))
+            Game.index += 1
+            if self.game_over() is not None:
+                if self.game_over() == 1:
+                    print('先手方胜')
+                else:
+                    print('后手方胜')
+                self.get_txt_file()
+                return
             key2 = int(input('我方色子: '))
             state1 = State(Game.board.copy(), 1 if Game.first else -1, key2)
             state2 = State(Game.board.copy(), 1 if Game.first else -1, key2)
@@ -183,7 +251,8 @@ class Game(tk.Tk):  # TODO 增加先手
             mcts4 = MonteCarloTreeSearch(node4)
 
             pool = Pool(4)
-            ress = pool.map(MonteCarloTreeSearch.best_action, [mcts1, mcts2, mcts3, mcts4])
+            ress = pool.map(MonteCarloTreeSearch.best_action,
+                            [mcts1, mcts2, mcts3, mcts4])
             pool.close()
             pool.join()
 
@@ -196,9 +265,30 @@ class Game(tk.Tk):  # TODO 增加先手
                 if cnt > max_cnt:
                     max_cnt = cnt
                     best_res = res
+            tmp = np.where((Game.board == best_res) == False)
+            if Game.first:
+                C = 'R{}'.format(best_res[tmp[0][1]][tmp[1][1]])
+                Game.txt_strs.append(
+                    '{}:{};({},{})'.format(Game.index, key2, C,
+                                           self.chess_dir(tmp[0][1],
+                                                          tmp[1][1])))
+            else:
+                C = 'B{}'.format(-best_res[tmp[0][0]][tmp[1][0]])
+                Game.txt_strs.append(
+                    '{}:{};({},{})'.format(Game.index, key2, C,
+                                           self.chess_dir(tmp[0][0],
+                                                          tmp[1][0])))
+            Game.index += 1
             Game.board = best_res
             self.show_board()
             self.print_board()
+            if self.game_over() is not None:
+                if self.game_over() == 1:
+                    print('先手方胜')
+                else:
+                    print('后手方胜')
+                self.get_txt_file()
+                return
 
 
 if __name__ == '__main__':
