@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 # author: MaoLongLong
 # date: 2019/9/12
+import os
+import time
 import tkinter as tk
+from multiprocessing import Pool
 
 import numpy as np
-import time
 
-from multiprocessing import Pool
 from mcts.einstein import State
 from mcts.node import MonteCarloTreeSearchNode
 from mcts.search import MonteCarloTreeSearch
@@ -98,6 +99,7 @@ class Game(tk.Tk):  # TODO 增加先手
             Game.index += 1
             Game.board = best_res
             self.show_board()
+            os.system('clear')
             print(Game.board)
 
         else:
@@ -154,6 +156,9 @@ class Game(tk.Tk):  # TODO 增加先手
         else:
             self.cv.create_oval(x1, y1, x2, y2, fill=color, outline=line,
                                 width=3)
+            self.cv.create_text((x1 + x2) / 2, (y1 + y2) / 2,
+                                text=str(abs(key)),
+                                font=('Fira Code Medium', 30), fill='white')
         Game.board[i][j] = key
 
     def show_board(self):
@@ -215,6 +220,7 @@ class Game(tk.Tk):  # TODO 增加先手
                 fp.write(i + '\n')
 
     def on_right_click(self, event):
+        os.system('clear')
         i = (event.y - 20) // 88
         j = (event.x - 20) // 88
         if Game._focus is not None:
