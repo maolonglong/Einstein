@@ -210,14 +210,14 @@ class Game(tk.Tk):  # TODO 增加先手
         with open('./WTN-{}vs{}-{}{}.txt'.format(a, b, c,
                                                  time.strftime("%Y%m%d%H%M",
                                                                time.localtime())),
-                  'w') as fp:
+                  'w', encoding='gb2312') as fp:
             fp.write(
                 '#[WTN][{} R][{} B][{}][{} 北京][2019CCGC];'.format(a, b, c,
                                                                   time.strftime(
                                                                       "%Y.%m.%d %H:%M",
-                                                                      time.localtime())) + '\n')
+                                                                      time.localtime())) + '\r\n')
             for i in Game.txt_strs:
-                fp.write(i + '\n')
+                fp.write(i + '\r\n')
 
     def on_right_click(self, event):
         os.system('clear')
