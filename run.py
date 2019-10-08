@@ -210,7 +210,7 @@ class Game(tk.Tk):  # TODO 增加先手
         with open('./WTN-{}vs{}-{}{}.txt'.format(a, b, c,
                                                  time.strftime("%Y%m%d%H%M",
                                                                time.localtime())),
-                  'w', encoding='gb2312') as fp:
+                  'w', encoding='utf-8', newline='') as fp:
             fp.write(
                 '#[WTN][{} R][{} B][{}][{} 北京][2019CCGC];'.format(a, b, c,
                                                                   time.strftime(
